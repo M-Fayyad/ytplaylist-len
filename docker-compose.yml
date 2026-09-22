@@ -1,0 +1,64 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ytplaylist_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APIS=${APIS}
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://mongo:27017
+      - BASE_URL=${BASE_URL:-http://localhost:8000}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - yt_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ytplaylist_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - yt_net
+
+  mongo:
+    image: mongo:7
+    container_name: ytplaylist_mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - yt_net
+
+volumes:
+  redis_data:
+  mongo_data:
+
+networks:
+  yt_net:
+    driver: bridge

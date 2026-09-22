@@ -1,0 +1,29 @@
+# Cache & Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.venv/
+
+# Git
+.git/
+.gitignore
+
+# Environment & local files
+.env
+.env.*
+
+# Testing & Dev
+tests/
+requirements-dev.txt
+.pytest_cache/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Ignore root documentation but keep blog markdown files
+README.md
